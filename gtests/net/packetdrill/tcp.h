@@ -55,6 +55,8 @@
 #define TCP_USER_TIMEOUT         18  /* How long to retry losses */
 #define TCP_FASTOPEN             23  /* TCP Fast Open: data in SYN */
 
+#define TCP_RDB                  29  /* TCP RDB */
+
 /* TODO: remove these when netinet/tcp.h has them */
 #ifndef TCPI_OPT_ECN_SEEN
 #define TCPI_OPT_ECN_SEEN	16 /* received at least one packet with ECT */

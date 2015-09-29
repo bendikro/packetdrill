@@ -1,0 +1,60 @@
+
+`sysctl -q net.ipv4.tcp_rdb_max_skbs=1`
++0.0 `sysctl -q net.ipv4.tcp_rdb_max_bytes=0`
+
+0     socket(..., SOCK_STREAM, IPPROTO_TCP) = 3
+   +0 setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
+   +0 setsockopt(3, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+   +0 setsockopt(3, SOL_TCP, TCP_RDB, [1], 4) = 0
+   +0 setsockopt(3, IPPROTO_TCP, TCP_CONGESTION, "reno", 4) = 0
+   +0 bind(3, ..., ...) = 0
+   +0 listen(3, 1) = 0
+
+   +0 < S 0:0(0) win 65535 <mss 1460,sackOK,nop,nop>
+   +0 > S. 0:0(0) ack 1 <mss 1460,nop,nop,sackOK>
++.200 < . 1:1(0) ack 1 win 65535
+   +0 accept(3, ..., ...) = 4
+
+// +0 %{ print "tcpi_snd_cwnd=%d tcpi_snd_ssthresh=%d" % (tcpi_snd_cwnd, tcpi_snd_ssthresh) }%
++.200 < . 1:1(0) ack 201 win 65535
+
+4.00 write(4, ..., 100) = 100
+    +0  > P. 1:101(100) ack 1
+4.01 write(4, ..., 100) = 100
+    +0  > P. 1:201(200) ack 1
+4.02 write(4, ..., 100) = 100
+    +0  > P. 101:301(200) ack 1
+4.03 write(4, ..., 100) = 100
+    +0  > P. 201:401(200) ack 1
+4.04 write(4, ..., 100) = 100
+    +0  > P. 301:501(200) ack 1
+4.05 write(4, ..., 100) = 100
+    +0  > P. 401:601(200) ack 1
+4.06 write(4, ..., 100) = 100
+    +0  > P. 501:701(200) ack 1
+4.07 write(4, ..., 100) = 100
+    +0  > P. 601:801(200) ack 1
+4.08 write(4, ..., 100) = 100
+    +0  > P. 701:901(200) ack 1
+4.09 write(4, ..., 100) = 100
+    +0  > P. 801:1001(200) ack 1
+
+//+0 %{ print "tcpi_snd_cwnd=%d tcpi_snd_ssthresh=%d tcpi_unacked=%d" % (tcpi_snd_cwnd, tcpi_snd_ssthresh, tcpi_unacked) }%
+
++0 %{ assert tcpi_unacked == 10 }%
+
+4.11 < . 1:1(0) ack 101 win 65535
+  +0 < . 1:1(0) ack 201 win 65535
+  +0 < . 1:1(0) ack 301 win 65535
+  +0 < . 1:1(0) ack 401 win 65535
+  +0 < . 1:1(0) ack 501 win 65535
+  +0 < . 1:1(0) ack 601 win 65535
+  +0 < . 1:1(0) ack 701 win 65535
+
+
+// With no lost  segments the CWND is increased by one for each ACKed segment
++0 %{ assert tcpi_snd_cwnd == 17 }%
+
++0 %{ assert tcpi_unacked == 3 }%
+
+// +0 %{ print "tcpi_snd_cwnd=%d tcpi_snd_ssthresh=%d tcpi_unacked=%d" % (tcpi_snd_cwnd, tcpi_snd_ssthresh, tcpi_unacked) }%

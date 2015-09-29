@@ -113,6 +113,7 @@ struct int_symbol platform_symbols_table[] = {
 	{ TCP_COOKIE_TRANSACTIONS,          "TCP_COOKIE_TRANSACTIONS"         },
 	{ TCP_THIN_LINEAR_TIMEOUTS,         "TCP_THIN_LINEAR_TIMEOUTS"        },
 	{ TCP_THIN_DUPACK,                  "TCP_THIN_DUPACK"                 },
+	{ TCP_RDB,                          "TCP_RDB"                         },
 	{ TCP_USER_TIMEOUT,                 "TCP_USER_TIMEOUT"                },
 
 	{ O_RDONLY,                         "O_RDONLY"                        },
