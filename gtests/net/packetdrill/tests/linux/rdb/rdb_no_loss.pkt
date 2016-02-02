@@ -1,5 +1,5 @@
 
-`sysctl -q net.ipv4.tcp_rdb_max_skbs=0`
+`sysctl -q net.ipv4.tcp_rdb_max_packets=0`
 +0.0 `sysctl -q net.ipv4.tcp_rdb_max_bytes=0`
 
 0     socket(..., SOCK_STREAM, IPPROTO_TCP) = 3
@@ -33,7 +33,7 @@
 
 // +0 %{ print "tcpi_snd_cwnd=%d tcpi_snd_ssthresh=%d" % (tcpi_snd_cwnd, tcpi_snd_ssthresh) }%
 
-// tcp_rdb_max_skbs is 0, so limited by MSS (1460)
+// tcp_rdb_max_packets is 0, so limited by MSS (1460)
 // Can only bundle two previous segments (of 400 bytes)
 
 4.06 write(4, ..., 400) = 400

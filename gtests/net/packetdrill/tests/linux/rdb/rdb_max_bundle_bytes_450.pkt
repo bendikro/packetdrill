@@ -1,5 +1,5 @@
 
-`sysctl -q net.ipv4.tcp_rdb_max_skbs=0`
+`sysctl -q net.ipv4.tcp_rdb_max_packets=0`
 +0.0 `sysctl -q net.ipv4.tcp_rdb_max_bytes=450`
 
 0     socket(..., SOCK_STREAM, IPPROTO_TCP) = 3

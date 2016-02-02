@@ -1,5 +1,5 @@
 
-`sysctl -q net.ipv4.tcp_rdb_max_skbs=2`
+`sysctl -q net.ipv4.tcp_rdb_max_packets=1`
 +0.0 `sysctl -q net.ipv4.tcp_rdb_max_bytes=0`
 
 0     socket(..., SOCK_STREAM, IPPROTO_TCP) = 3
@@ -23,18 +23,15 @@
 4.01 write(4, ..., 100) = 100
     +0  > P. 1:201(200) ack 1
 
-4.02 write(4, ..., 100) = 100
-    +0  > P. 1:301(300) ack 1
++0 %{ assert tcpi_unacked == 2 }%
+
+// tcp_rdb_max_packets is 1, so only one previous segment is bundled
+
+4.03 write(4, ..., 100) = 100
+        +0 > P. 101:301(200) ack 1
 
 +0 %{ assert tcpi_unacked == 3 }%
 
-// tcp_rdb_max_skbs is 2, so two previous segments are bundled
+4.20 < . 1:1(0) ack 301 win 65535
 
-4.03 write(4, ..., 100) = 100
-        +0 > P. 101:401(300) ack 1
-
-+0 %{assert tcpi_unacked == 4 }%
-
-4.20 < . 1:1(0) ack 401 win 65535
-
-+0 %{assert tcpi_unacked == 0 }%
++0 %{ assert tcpi_unacked == 0 }%

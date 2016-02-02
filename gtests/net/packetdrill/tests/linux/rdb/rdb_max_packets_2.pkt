@@ -1,5 +1,5 @@
 
-`sysctl -q net.ipv4.tcp_rdb_max_skbs=0`
+`sysctl -q net.ipv4.tcp_rdb_max_packets=2`
 +0.0 `sysctl -q net.ipv4.tcp_rdb_max_bytes=0`
 
 0     socket(..., SOCK_STREAM, IPPROTO_TCP) = 3
@@ -10,7 +10,7 @@
    +0 bind(3, ..., ...) = 0
    +0 listen(3, 1) = 0
 
-   +0 < S 0:0(0) win 65535 <mss 1460,sackOK,nop,nop>
+   +0 < S 0:0(0) win 65535 <mss 1000,sackOK,nop,nop>
    +0 > S. 0:0(0) ack 1 <mss 1460,nop,nop,sackOK>
 +.200 < . 1:1(0) ack 1 win 65535
    +0 accept(3, ..., ...) = 4
@@ -18,21 +18,23 @@
 //+0 %{ print "tcpi_snd_cwnd=%d tcpi_snd_ssthresh=%d" % (tcpi_snd_cwnd, tcpi_snd_ssthresh) }%
 +.200 < . 1:1(0) ack 201 win 65535
 
-4.00 write(4, ..., 400) = 400
-    +0  > P. 1:401(400) ack 1
-4.01 write(4, ..., 400) = 400
-    +0  > P. 1:801(800) ack 1
-4.02 write(4, ..., 400) = 400
-    +0  > P. 1:1201(1200) ack 1
+4.00 write(4, ..., 100) = 100
+    +0  > P. 1:101(100) ack 1
+4.01 write(4, ..., 100) = 100
+    +0  > P. 1:201(200) ack 1
 
-//+0 %{ print "tcpi_snd_cwnd=%d tcpi_snd_ssthresh=%d tcpi_unacked=%d" % (tcpi_snd_cwnd, tcpi_snd_ssthresh, tcpi_unacked) }%
+4.02 write(4, ..., 100) = 100
+    +0  > P. 1:301(300) ack 1
 
 +0 %{ assert tcpi_unacked == 3 }%
 
-// tcp_rdb_max_skbs is 0, so limited by MSS (1460)
-// Can only bundle two previous segments (of 400 bytes)
+// tcp_rdb_max_packets is 2, so two previous segments are bundled
 
-4.03 write(4, ..., 400) = 400
-        +0 > P. 401:1601(1200) ack 1
+4.03 write(4, ..., 100) = 100
+        +0 > P. 101:401(300) ack 1
 
-+0 %{ assert tcpi_unacked == 4 }%
++0 %{assert tcpi_unacked == 4 }%
+
+4.20 < . 1:1(0) ack 401 win 65535
+
++0 %{assert tcpi_unacked == 0 }%
