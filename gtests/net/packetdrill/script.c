@@ -78,6 +78,28 @@ const char *expression_type_to_string(enum expression_t type)
 	return "UNKNOWN_TYPE";
 }
 
+const char* event_to_str(enum event_t t) {
+	switch (t) {
+	case INVALID_EVENT: return "INVALID_EVENT";
+	case PACKET_EVENT: return "PACKET_EVENT";
+	case SYSCALL_EVENT: return "SYSCALL_EVENT";
+	case COMMAND_EVENT: return "COMMAND_EVENT";
+	case CODE_EVENT: return "CODE_EVENT";
+	case NUM_EVENT_TYPES: return "NUM_EVENT_TYPES";
+	}
+	return "";
+}
+
+const char* direction_to_string(enum direction_t t) {
+	switch (t) {
+	case DIRECTION_INVALID: return "DIRECTION_INVALID";
+	case DIRECTION_INBOUND: return "DIRECTION_INBOUND";
+	case DIRECTION_OUTBOUND: return "DIRECTION_OUTBOUND";
+	}
+	return "";
+}
+
+
 /* Cross-platform symbols. */
 struct int_symbol cross_platform_symbols[] = {
 	{ AF_INET,                          "AF_INET"                         },

@@ -35,6 +35,8 @@
 #include "wire_server.h"
 #include "wire_server_netdev.h"
 
+#include "packet_to_string.h"
+
 /* Internal private state for the wire server to run one script. */
 struct wire_server {
 	struct wire_conn *wire_conn;		/* connection to wire client */
@@ -342,6 +344,19 @@ static int wire_server_run_packet_event(
 {
 	int result = STATUS_OK;
 
+	int status = 0;
+	char *dump = NULL, *expected = NULL;
+	char *err = NULL;
+
+	/* Test a DUMP_SHORT dump */
+	status = packet_to_string(packet, DUMP_SHORT, &dump, &err);
+
+	printf(" %c %c : %s %s\n", packet->direction == DIRECTION_INBOUND ? '<' : '>', packet->lost ? '!' : ' ', dump, packet->lost ? " LOST" : "");
+	free(dump);
+
+	if (packet->lost) {
+		return result;
+	}
 	result = run_packet_event(wire_server->state,
 					  event, packet, error);
 	if (result == STATUS_ERR) {
@@ -363,6 +378,7 @@ static int wire_server_run_packet_event(
 	}
 	return result;
 }
+
 
 /* Execute the server-side duties for remote on-the-wire testing using
  * a real NIC. Basically the server side just needs to send packets

@@ -29,6 +29,7 @@
 
 #include <sys/time.h>
 #include "packet.h"
+#include "types.h"
 
 /* The types of expressions in a script */
 enum expression_t {
@@ -49,6 +50,7 @@ enum expression_t {
 };
 /* Convert an expression type to a human-readable string */
 const char *expression_type_to_string(enum expression_t type);
+const char* direction_to_string(enum direction_t t);
 
 /* An expression in a script */
 struct expression {
@@ -252,4 +254,6 @@ extern int evaluate_expression_list(struct expression_list *in_list,
 				    struct expression_list **out_list,
 				    char **error);
 
+
+const char *event_to_str(enum event_t t);
 #endif /* __SCRIPT_H__ */

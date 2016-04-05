@@ -442,6 +442,7 @@ static struct tcp_option *new_tcp_fast_open_option(const char *cookie_string,
 	char *reserved;
 	s64 time_usecs;
 	enum direction_t direction;
+	int lost;
 	enum ip_ecn_t ip_ecn;
 	struct mpls_stack *mpls_stack;
 	struct mpls mpls_stack_entry;
@@ -470,6 +471,8 @@ static struct tcp_option *new_tcp_fast_open_option(const char *cookie_string,
  * directive. By convention terminal symbols returned from the lexer
  * have ALL_CAPS names, and nonterminal symbols have lower_case names.
  */
+%error-verbose
+
 %token ELLIPSIS
 %token <reserved> SA_FAMILY SIN_PORT SIN_ADDR _HTONS_ INET_ADDR
 %token <reserved> MSG_NAME MSG_IOV MSG_FLAGS
@@ -484,6 +487,7 @@ static struct tcp_option *new_tcp_fast_open_option(const char *cookie_string,
 %token <integer> INTEGER HEX_INTEGER
 %token <string> WORD STRING BACK_QUOTED CODE IPV4_ADDR IPV6_ADDR
 %type <direction> direction
+%type <lost> lost
 %type <ip_ecn> opt_ip_info
 %type <ip_ecn> ip_ecn
 %type <option> option options opt_options
@@ -679,7 +683,7 @@ tcp_packet_spec
 : packet_prefix opt_ip_info flags seq opt_ack opt_window opt_tcp_options {
 	char *error = NULL;
 	struct packet *outer = $1, *inner = NULL;
-	enum direction_t direction = outer->direction;
+	enum direction_t direction = packet_direction(outer);
 
 	if (($7 == NULL) && (direction != DIRECTION_OUTBOUND)) {
 		yylineno = @7.first_line;
@@ -746,9 +750,10 @@ icmp_packet_spec
 
 
 packet_prefix
-: direction {
+: direction lost {
 	$$ = packet_new(PACKET_MAX_HEADER_BYTES);
 	$$->direction = $1;
+	$$->lost = $2;
 }
 | packet_prefix IPV4 IPV4_ADDR '>' IPV4_ADDR ':' {
 	char *error = NULL;
@@ -863,6 +868,11 @@ opt_icmp_mtu
 direction
 : '<'          { $$ = DIRECTION_INBOUND;  current_script_line = yylineno; }
 | '>'          { $$ = DIRECTION_OUTBOUND; current_script_line = yylineno; }
+;
+
+lost
+:     { $$ = 0; }
+| '~' { $$ = 1; }
 ;
 
 opt_ip_info

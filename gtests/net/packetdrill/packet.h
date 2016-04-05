@@ -72,6 +72,7 @@ struct packet {
 	u32 l2_header_bytes;	/* bytes in outer hardware/layer-2 header */
 	u32 ip_bytes;		/* bytes in outermost IP hdrs/payload */
 	enum direction_t direction;	/* direction packet is traveling */
+	int lost;
 
 	/* Metadata about all the headers in the packet, including all
 	 * layers of encapsulation, from outer to inner, starting from
@@ -148,6 +149,7 @@ static inline struct packet *packet_encapsulate_and_free(struct packet *outer,
 							 struct packet *inner)
 {
 	struct packet *packet = packet_encapsulate(outer, inner);
+	packet->lost = outer->lost;
 	packet_free(outer);
 	packet_free(inner);
 	return packet;
